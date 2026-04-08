@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { ApplicationTabs } from "./src/navigators/ApplicationTabs";
+import { RootStack } from "./src/navigators/RootStack";
 import { PerfOverlay } from "./src/utils/perf";
 
 export default function App() {
@@ -10,7 +10,7 @@ export default function App() {
     <SafeAreaProvider>
       <View style={styles.container}>
         <NavigationContainer>
-          <ApplicationTabs />
+          <RootStack />
         </NavigationContainer>
         <PerfOverlay />
       </View>

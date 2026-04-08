@@ -26,7 +26,7 @@ ZenMaid Mobile has performance issues when switching tabs and navigating screens
 
 - [x] **Phase 1** — Bare bottom tabs (tag: `phase-1`)
 - [x] **Phase 2** — Add large network requests
-- [ ] **Phase 3** — Nested NativeStack > BottomTabs > NativeStack
+- [x] **Phase 3** — Nested NativeStack > BottomTabs > NativeStack
 - [ ] **Phase 4** — React Query with persistence
 
 ---

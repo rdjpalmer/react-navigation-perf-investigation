@@ -7,21 +7,15 @@ import {
   View,
   StyleSheet,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useRenderTimer, reportTransition } from "../utils/perf";
 import { useLargeDataFetch } from "../hooks/useLargeDataFetch";
-import type { HomeStackParamList } from "../navigators/types";
 
 const PHOTOS_URL = "https://jsonplaceholder.typicode.com/photos";
 
 type Row = { id: string; title: string; subtitle?: string };
 
-type HomeNav = NativeStackNavigationProp<HomeStackParamList, "Home">;
-
-export function HomeScreen() {
+export function HomeDetailScreen() {
   useRenderTimer(reportTransition);
-  const navigation = useNavigation<HomeNav>();
   const { data, loading, error, refetch } = useLargeDataFetch({
     url: PHOTOS_URL,
     intervalMs: 5000,
@@ -31,10 +25,10 @@ export function HomeScreen() {
     if (!data?.length) {
       return [];
     }
-    return data.slice(0, 100).map((item, index) => {
+    return data.slice(0, 80).map((item, index) => {
       const row = item as Record<string, unknown>;
       const id = String(row.id ?? index);
-      const title = String(row.title ?? `Photo ${id}`);
+      const title = `Detail · ${String(row.title ?? id)}`;
       const subtitle =
         typeof row.url === "string" ? row.url.slice(0, 48) : undefined;
       return { id, title, subtitle };
@@ -44,12 +38,6 @@ export function HomeScreen() {
   return (
     <View style={styles.wrap}>
       <View style={styles.toolbar}>
-        <Pressable
-          style={styles.secondary}
-          onPress={() => navigation.navigate("HomeDetail")}
-        >
-          <Text style={styles.secondaryText}>Detail</Text>
-        </Pressable>
         <Pressable style={styles.button} onPress={() => void refetch()}>
           <Text style={styles.buttonText}>Refetch</Text>
         </Pressable>
@@ -57,7 +45,7 @@ export function HomeScreen() {
           <ActivityIndicator style={styles.spinner} />
         ) : (
           <Text style={styles.status}>
-            {error ? error.message : `${rows.length} rows (first 100)`}
+            {error ? error.message : `${rows.length} rows`}
           </Text>
         )}
       </View>
@@ -90,14 +78,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "#ccc",
   },
-  secondary: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#2196F3",
-  },
-  secondaryText: { color: "#2196F3", fontWeight: "600" },
   button: {
     backgroundColor: "#2196F3",
     paddingHorizontal: 14,

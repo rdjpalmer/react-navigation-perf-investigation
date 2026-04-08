@@ -7,15 +7,24 @@ import {
   View,
   StyleSheet,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useRenderTimer, reportTransition } from "../utils/perf";
 import { useLargeDataFetch } from "../hooks/useLargeDataFetch";
+import type { SettingsStackParamList } from "../navigators/types";
 
 const COMMENTS_URL = "https://jsonplaceholder.typicode.com/comments";
 
 type Row = { id: string; title: string; subtitle?: string };
 
+type SettingsNav = NativeStackNavigationProp<
+  SettingsStackParamList,
+  "Settings"
+>;
+
 export function SettingsScreen() {
   useRenderTimer(reportTransition);
+  const navigation = useNavigation<SettingsNav>();
   const { data, loading, error, refetch } = useLargeDataFetch({
     url: COMMENTS_URL,
     intervalMs: 5000,
@@ -37,6 +46,12 @@ export function SettingsScreen() {
   return (
     <View style={styles.wrap}>
       <View style={styles.toolbar}>
+        <Pressable
+          style={styles.secondary}
+          onPress={() => navigation.navigate("SettingsDetail")}
+        >
+          <Text style={styles.secondaryText}>Detail</Text>
+        </Pressable>
         <Pressable style={styles.button} onPress={() => void refetch()}>
           <Text style={styles.buttonText}>Refetch</Text>
         </Pressable>
@@ -77,6 +92,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "#ccc",
   },
+  secondary: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#2196F3",
+  },
+  secondaryText: { color: "#2196F3", fontWeight: "600" },
   button: {
     backgroundColor: "#2196F3",
     paddingHorizontal: 14,
