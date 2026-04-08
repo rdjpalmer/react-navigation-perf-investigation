@@ -10,10 +10,8 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useRenderTimer, reportTransition } from "../utils/perf";
-import { useLargeDataFetch } from "../hooks/useLargeDataFetch";
+import { usePhotosQuery } from "../queries/usePhotosQuery";
 import type { HomeStackParamList } from "../navigators/types";
-
-const PHOTOS_URL = "https://jsonplaceholder.typicode.com/photos";
 
 type Row = { id: string; title: string; subtitle?: string };
 
@@ -22,10 +20,8 @@ type HomeNav = NativeStackNavigationProp<HomeStackParamList, "Home">;
 export function HomeScreen() {
   useRenderTimer(reportTransition);
   const navigation = useNavigation<HomeNav>();
-  const { data, loading, error, refetch } = useLargeDataFetch({
-    url: PHOTOS_URL,
-    intervalMs: 5000,
-  });
+  const { data, isFetching, isPending, isError, error, refetch } =
+    usePhotosQuery();
 
   const rows: Row[] = useMemo(() => {
     if (!data?.length) {
@@ -41,6 +37,8 @@ export function HomeScreen() {
     });
   }, [data]);
 
+  const showSpinner = isPending || isFetching;
+
   return (
     <View style={styles.wrap}>
       <View style={styles.toolbar}>
@@ -53,11 +51,13 @@ export function HomeScreen() {
         <Pressable style={styles.button} onPress={() => void refetch()}>
           <Text style={styles.buttonText}>Refetch</Text>
         </Pressable>
-        {loading ? (
+        {showSpinner ? (
           <ActivityIndicator style={styles.spinner} />
         ) : (
           <Text style={styles.status}>
-            {error ? error.message : `${rows.length} rows (first 100)`}
+            {isError
+              ? (error as Error).message
+              : `${rows.length} rows (first 100)`}
           </Text>
         )}
       </View>

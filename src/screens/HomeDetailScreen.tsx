@@ -8,18 +8,14 @@ import {
   StyleSheet,
 } from "react-native";
 import { useRenderTimer, reportTransition } from "../utils/perf";
-import { useLargeDataFetch } from "../hooks/useLargeDataFetch";
-
-const PHOTOS_URL = "https://jsonplaceholder.typicode.com/photos";
+import { usePhotosQuery } from "../queries/usePhotosQuery";
 
 type Row = { id: string; title: string; subtitle?: string };
 
 export function HomeDetailScreen() {
   useRenderTimer(reportTransition);
-  const { data, loading, error, refetch } = useLargeDataFetch({
-    url: PHOTOS_URL,
-    intervalMs: 5000,
-  });
+  const { data, isFetching, isPending, isError, error, refetch } =
+    usePhotosQuery();
 
   const rows: Row[] = useMemo(() => {
     if (!data?.length) {
@@ -35,17 +31,21 @@ export function HomeDetailScreen() {
     });
   }, [data]);
 
+  const showSpinner = isPending || isFetching;
+
   return (
     <View style={styles.wrap}>
       <View style={styles.toolbar}>
         <Pressable style={styles.button} onPress={() => void refetch()}>
           <Text style={styles.buttonText}>Refetch</Text>
         </Pressable>
-        {loading ? (
+        {showSpinner ? (
           <ActivityIndicator style={styles.spinner} />
         ) : (
           <Text style={styles.status}>
-            {error ? error.message : `${rows.length} rows`}
+            {isError
+              ? (error as Error).message
+              : `${rows.length} rows`}
           </Text>
         )}
       </View>

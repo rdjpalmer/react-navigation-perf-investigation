@@ -10,10 +10,8 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useRenderTimer, reportTransition } from "../utils/perf";
-import { useLargeDataFetch } from "../hooks/useLargeDataFetch";
+import { useCommentsQuery } from "../queries/useCommentsQuery";
 import type { SettingsStackParamList } from "../navigators/types";
-
-const COMMENTS_URL = "https://jsonplaceholder.typicode.com/comments";
 
 type Row = { id: string; title: string; subtitle?: string };
 
@@ -25,10 +23,8 @@ type SettingsNav = NativeStackNavigationProp<
 export function SettingsScreen() {
   useRenderTimer(reportTransition);
   const navigation = useNavigation<SettingsNav>();
-  const { data, loading, error, refetch } = useLargeDataFetch({
-    url: COMMENTS_URL,
-    intervalMs: 5000,
-  });
+  const { data, isFetching, isPending, isError, error, refetch } =
+    useCommentsQuery();
 
   const rows: Row[] = useMemo(() => {
     if (!data?.length) {
@@ -43,6 +39,8 @@ export function SettingsScreen() {
     });
   }, [data]);
 
+  const showSpinner = isPending || isFetching;
+
   return (
     <View style={styles.wrap}>
       <View style={styles.toolbar}>
@@ -55,11 +53,13 @@ export function SettingsScreen() {
         <Pressable style={styles.button} onPress={() => void refetch()}>
           <Text style={styles.buttonText}>Refetch</Text>
         </Pressable>
-        {loading ? (
+        {showSpinner ? (
           <ActivityIndicator style={styles.spinner} />
         ) : (
           <Text style={styles.status}>
-            {error ? error.message : `${rows.length} rows (first 100)`}
+            {isError
+              ? (error as Error).message
+              : `${rows.length} rows (first 100)`}
           </Text>
         )}
       </View>

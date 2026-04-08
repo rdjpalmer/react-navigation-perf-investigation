@@ -8,18 +8,14 @@ import {
   StyleSheet,
 } from "react-native";
 import { useRenderTimer, reportTransition } from "../utils/perf";
-import { useLargeDataFetch } from "../hooks/useLargeDataFetch";
-
-const COMMENTS_URL = "https://jsonplaceholder.typicode.com/comments";
+import { useCommentsQuery } from "../queries/useCommentsQuery";
 
 type Row = { id: string; title: string; subtitle?: string };
 
 export function SettingsDetailScreen() {
   useRenderTimer(reportTransition);
-  const { data, loading, error, refetch } = useLargeDataFetch({
-    url: COMMENTS_URL,
-    intervalMs: 5000,
-  });
+  const { data, isFetching, isPending, isError, error, refetch } =
+    useCommentsQuery();
 
   const rows: Row[] = useMemo(() => {
     if (!data?.length) {
@@ -34,17 +30,21 @@ export function SettingsDetailScreen() {
     });
   }, [data]);
 
+  const showSpinner = isPending || isFetching;
+
   return (
     <View style={styles.wrap}>
       <View style={styles.toolbar}>
         <Pressable style={styles.button} onPress={() => void refetch()}>
           <Text style={styles.buttonText}>Refetch</Text>
         </Pressable>
-        {loading ? (
+        {showSpinner ? (
           <ActivityIndicator style={styles.spinner} />
         ) : (
           <Text style={styles.status}>
-            {error ? error.message : `${rows.length} rows`}
+            {isError
+              ? (error as Error).message
+              : `${rows.length} rows`}
           </Text>
         )}
       </View>
